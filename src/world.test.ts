@@ -6,8 +6,7 @@ describe("world", () => {
     let world: string;
 
     beforeEach(async () => {
-      world = await generateWorld({ seed: 1 });
-      console.log(JSON.stringify(world, null, 2));
+      world = await generateWorld({ seed: 0 });
     });
 
     it("should generate a world", async () => {
@@ -28,4 +27,6 @@ describe("world", () => {
       expect(world1).toEqual(world2);
     });
   });
+
+  describe("when the user asks what is in a room", () => {});
 });
