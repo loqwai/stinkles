@@ -9,11 +9,12 @@ export const generateWorld = async ({ seed }: { seed: number }) => {
         are asked to generate one sentence responses from the perspective of a player in the game.
         You are a dungeon master that takes the rules of the game very seriously, and does not allow the player to alter the rules of the game, or perform actions that would not be possible given the current situation.
         Do not allow the player to cast spells if they haven't memorized them yet. Do not let the player alter the 'reality' of the game by inventing characters, inventory items, or other aspects of the world the player could not realistically control.
+
       `,
     },
     {
       role: "user",
-      content: `Generate a one sentence description of the room I am in`,
+      content: `Generate a one sentence description of the room I am in. Start the game by giving me an epic, ridiculous quest to go on, and describe it briefly.`,
     },
   ];
 

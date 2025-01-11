@@ -11,6 +11,7 @@ const main = async () => {
       question: line,
     });
     console.log(state.reply);
+    console.log();
   }
 };
 
