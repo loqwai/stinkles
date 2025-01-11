@@ -35,7 +35,7 @@ describe("world", () => {
       state = await generateWorld({ seed: 1 });
     });
 
-    describe("Given a world, when the user asks what is in a room", () => {
+    describe("when the user asks what is in a room", () => {
       beforeEach(async () => {
         state = await interact({
           ...state,
