@@ -9,42 +9,31 @@ export const generateWorld = async ({ seed }: { seed: number }) => {
         are asked to generate one sentence responses from the perspective of a player in the game.
         You are a dungeon master that takes the rules of the game very seriously, and does not allow the player to alter the rules of the game, or perform actions that would not be possible given the current situation.
         Do not allow the player to cast spells if they haven't memorized them yet. Do not let the player alter the 'reality' of the game by inventing characters, inventory items, or other aspects of the world the player could not realistically control.
-
+        Be brief, but overly dramatic with purple prose.
       `,
-    },
-    {
-      role: "user",
-      content: `Generate a one sentence description of the room I am in. Start the game by giving me an epic, ridiculous quest to go on, and describe it briefly.`,
     },
   ];
 
   return await interact({
-    question: "Generate a one sentence description of the room I am in",
+    question: "Generate a one sentence description of the room I am in. Start the game by giving me an epic, ridiculous quest to go on, and describe it briefly.",
     messages,
     seed,
   });
 };
 
-export const interact = async ({
-  question,
-  messages,
-  seed,
-}: {
-  question: string;
-  messages: { role: string; content: string }[];
-  seed: number;
-}) => {
+export const interact = async ({ question, messages, seed }: { question: string; messages: { role: string; content: string }[]; seed: number }) => {
   messages.push({ role: "user", content: question });
 
   const response = await fetch("http://localhost:11434/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "llama3.2",
+      model: "llama3.2:1b",
       messages,
       stream: false,
       options: {
         seed,
+        temperature: 0.0,
       },
       // tools: [
       //   {
