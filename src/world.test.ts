@@ -1,14 +1,15 @@
 import { doesThisMakeSense } from "./doesThisMakeSense";
 import { generateWorld, interact } from "./world";
-import { describe, it, beforeEach, expect } from "bun:test";
+import { describe, it, beforeAll, expect } from "bun:test";
+import { prettyPrintOllama } from "./utils/prettyPrint";
 import "./expectToMakeSense";
 
 describe("world", () => {
   describe("generateWorld", () => {
     let world: Awaited<ReturnType<typeof generateWorld>>;
 
-    beforeEach(async () => {
-      world = await generateWorld({ seed: 0 });
+    beforeAll(async () => {
+      world = await generateWorld({ seed: 1 });
     });
 
     it("should generate a world", async () => {
@@ -20,7 +21,7 @@ describe("world", () => {
     let world1: Awaited<ReturnType<typeof generateWorld>>;
     let world2: Awaited<ReturnType<typeof generateWorld>>;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
       world1 = await generateWorld({ seed: 1 });
       world2 = await generateWorld({ seed: 1 });
     });
@@ -30,37 +31,69 @@ describe("world", () => {
     });
   });
 
-  describe.only("Given a world", () => {
+  describe("Given a world", () => {
     let state: Awaited<ReturnType<typeof interact>>;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
       state = await generateWorld({ seed: 1 });
     });
 
     describe("when the user goes north", () => {
-      beforeEach(async () => {
+      let startMessages: typeof state.messages;
+
+      beforeAll(async () => {
+        startMessages = state.messages;
+
         state = await interact({
           ...state,
-          question: "I go north.",
+          question: "I go to the Caverns of Echoing Screams.",
         });
       });
 
-      // it("should reply that there are secrets of the cosmos", () => {
-      //   expect(state.reply, JSON.stringify(state, null, 2)).toContain("the secrets of the cosmos");
-      // });
+      it("should return a sensible state", async () => {
+        await expect(state).toMakeSense();
+      });
 
-      describe("when the user goes north", () => {
-        beforeEach(async () => {
-          state = await interact({
-            ...state,
-            question: "I keep going.",
-          });
+      it("should add the messages to the history", () => {
+        expect(state.messages, state.reply).not.toEqual(startMessages);
+      });
+
+      describe.skip("when the user goes north until it no longer makes sense", () => {
+        beforeAll(async () => {
+          while (true) {
+            state = await interact({
+              ...state,
+              question: "I go north.",
+            });
+            const res = await doesThisMakeSense(state);
+
+            console.log(`\n\n${state.reply}\nmakesSense(${res.makesSense}): ${res.reasoning}`);
+            if (!res.makesSense) return;
+          }
         });
 
-        it("should tell us that what happened makes sense", async () => {
-          // expect(state).toMakeSense();
-          await expect(state).toMakeSense();
+        it("should get here", async () => {
+          await expect(state).not.toMakeSense();
         });
+      });
+    });
+
+    describe("when the user tries to do something that doesn't make sense", () => {
+      let nextState: Awaited<ReturnType<typeof interact>>;
+
+      beforeAll(async () => {
+        nextState = await interact({
+          ...state,
+          question: "I pilot the millenium falcon into the deathstar.",
+        });
+      });
+
+      it("should have a reply", () => {
+        expect(nextState.reply).toBeDefined();
+      });
+
+      it("should not alter the messages", () => {
+        expect(nextState.messages).toEqual(state.messages);
       });
     });
   });

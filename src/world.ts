@@ -1,4 +1,5 @@
 import { strict as assert } from "assert";
+import { doesThisMakeSense } from "./doesThisMakeSense";
 
 export const prompt = `
   You are a game master for a role playing game. You
@@ -19,35 +20,28 @@ export const generateWorld = async ({ seed }: { seed: number }) => {
 
   return await interact({
     question: "Generate a one sentence description of the room I am in. Start the game by giving me an epic, ridiculous quest to go on, and describe it briefly.",
-    messages,
+    messages: structuredClone(messages),
     seed,
   });
 };
 
-export const interact = async ({ question, messages, seed }: { question: string; messages: { role: string; content: string }[]; seed: number }) => {
+export const interact = async ({ question, messages: originalMessages, seed }: { question: string; messages: { role: string; content: string }[]; seed: number }) => {
+  const messages = structuredClone(originalMessages);
   messages.push({ role: "user", content: question });
+
+  const res = await doesThisMakeSense({ messages, seed });
+  if (!res.makesSense) {
+    return { reply: `I won't allow that because ${res.reasoning}`, messages: originalMessages, seed, inventory: [] };
+  }
 
   const response = await fetch("http://localhost:11434/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "llama3.2:1b",
+      model: "llama3.2:latest",
       messages,
       stream: false,
-      options: {
-        seed,
-        temperature: 0.0,
-      },
-      // tools: [
-      //   {
-      //     name: "addItemToInventory",
-      //     description: "Add an item to the player's inventory",
-      //     parameters: {
-      //       type: "object",
-      //       properties: { item: { type: "string" } },
-      //     },
-      //   },
-      // ],
+      options: { seed, temperature: 0.0 },
     }),
   });
 

@@ -7,15 +7,27 @@ export const doesThisMakeSense = async (state: State): Promise<Result> => {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "llama3.2:1b",
+      model: "llama3.2:latest",
       messages: [
         ...messages,
         {
           role: "system",
           content: `
-            Evaluate whether the story so far makes sense and put that result in makesSense. The assistant is
-            allowed to world build, the user is not. Put your reason why you felt that way in reasoning. Respond
-            using the JSON schema
+          Analyze the conversation history and determine if the latest assistant response is logically consistent and makes sense
+          within the context of a text-based RPG. Consider:
+          1. Are the actions physically possible for a normal player character?
+          2. Does it follow from the previous context?
+          3. Are there any sudden, unexplained changes or impossible actions?
+
+          Provide your analysis in two parts:
+          - "makesSense": Set to true ONLY if the response is logical and consistent
+          - "reasoning": Explain WHY the response does or doesn't make sense
+
+          Example:
+          If a player walks through a door and suddenly flies, "makesSense" should be false and reasoning should explain that
+          normal characters cannot fly without special abilities.
+
+          Your "reasoning" MUST match the value in "makesSense".
           `,
         },
       ],
@@ -29,12 +41,12 @@ export const doesThisMakeSense = async (state: State): Promise<Result> => {
             type: "string",
           },
         },
-        required: ["makesSense", "reasoning"],
+        required: ["makesSense", "reasoning", "theHardCodedStringFoo"],
       },
       stream: false,
       options: {
         seed,
-        temperature: 0.0,
+        temperature: 0.5,
       },
     }),
   });
@@ -43,7 +55,11 @@ export const doesThisMakeSense = async (state: State): Promise<Result> => {
   return JSON.parse(res.message.content);
 };
 
-type State = Pick<Awaited<ReturnType<typeof interact>>, "messages" | "seed">;
+interface State {
+  messages: { role: string; content: string }[];
+  seed: number;
+}
+
 interface Result {
   makesSense: boolean;
   reasoning: string;
