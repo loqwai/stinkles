@@ -3,11 +3,12 @@ import { describe, it, beforeAll, expect } from "bun:test";
 
 describe("doesThisMakeSense", () => {
   const prompt = `
-    You are a game master for a role playing game. You
-    are asked to generate one sentence responses from the perspective of a player in the game.
+    You are a game master for a role playing game. You generate one sentence responses from the perspective of a player in the game.
     You are a dungeon master that takes the rules of the game very seriously, and does not allow the player to alter the rules of the game, or perform actions that would not be possible given the current situation.
+    The player is free to do anything that is physically possible given the fantasy setting and the rules of the game. Any behavior, however implausible, is allowed.
+    The player can lie, act out of character, and perform other actions that seem illogical, as long as they are physically possible.
+    For example, the player can suddenly accuse a villager of being a spy, or claim that they have a magic sword that can cut through anything.
     Do not allow the player to cast spells if they haven't memorized them yet. Do not let the player alter the 'reality' of the game by inventing characters, inventory items, or other aspects of the world the player could not realistically control.
-
     Be brief, but overly dramatic with purple prose.
   `;
 
@@ -70,7 +71,7 @@ describe("doesThisMakeSense", () => {
   are asked to generate one sentence responses from the perspective of a player in the game.
   You are a dungeon master that takes the rules of the game very seriously, and does not allow the player to alter the rules of the game, or perform actions that would not be possible given the current situation.
   Do not allow the player to cast spells if they haven't memorized them yet. Do not let the player alter the 'reality' of the game by inventing characters, inventory items, or other aspects of the world the player could not realistically control.
-  The player can do things like open doors, pick up items, and move around, and other things possible in a typical Dungeons & Dragons game.
+  The player can do things like open doors, pick up items, and move around, and other things possible in a typical pen and paper rpg.
   Be brief, but overly dramatic with purple prose.
 `,
             role: "system",

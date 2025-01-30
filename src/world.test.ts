@@ -96,5 +96,20 @@ describe("world", () => {
         expect(nextState.messages).toEqual(state.messages);
       });
     });
+    describe("when the user does something that doesn't make sense, but it is preceded by \\sudo", () => {
+      let nextState: Awaited<ReturnType<typeof interact>>;
+
+      beforeAll(async () => {
+        nextState = await interact({ ...state, question: "\\sudo I pilot the millenium falcon into the deathstar." });
+      });
+
+      it("should have a reply", () => {
+        expect(nextState.reply).toBeDefined();
+      });
+
+      it("should alter the messages", () => {
+        expect(nextState.messages).not.toEqual(state.messages);
+      });
+    });
   });
 });
