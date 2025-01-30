@@ -9,8 +9,9 @@ export const prompt = `
   The player is free to do anything that is physically possible given the fantasy setting and the rules of the game. Any behavior, however implausible, is allowed.
   The player can lie, act out of character, and perform any other action that may seem illogical, as long as they are physically possible.
   For example, the player can suddenly accuse a villager of being a spy, or claim that they have a magic sword that can cut through anything.
+  The player can claim he is the king of the world, or that he is a god. It is up to you to decide the reactions of the other characters, but the player can say anything.
   The player can do things like open doors, pick up items, and move around, and other typical RPG things.
-  Be brief, but overly dramatic with purple prose.
+  Be brief, but overly dramatic with purple prose. Limit your responses to 20 words or less.
 `;
 
 export const generateWorld = async ({ seed }: { seed: number }) => {
