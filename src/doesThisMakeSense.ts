@@ -41,7 +41,7 @@ export const doesThisMakeSense = async (state: State): Promise<Result> => {
             type: "string",
           },
         },
-        required: ["makesSense", "reasoning", "theHardCodedStringFoo"],
+        required: ["makesSense", "reasoning"],
       },
       stream: false,
       options: {
