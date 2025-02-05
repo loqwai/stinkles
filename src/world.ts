@@ -41,7 +41,7 @@ export const interact = async ({ question, messages: originalMessages, seed }: {
       model: "llama3.2:latest",
       messages,
       stream: false,
-      options: { seed, temperature: 0.0 },
+      options: { seed, temperature: 0.5 },
     }),
   });
 
