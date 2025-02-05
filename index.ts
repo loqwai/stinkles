@@ -2,8 +2,12 @@
 import { generateWorld, interact } from "./src/world";
 
 const main = async () => {
-  let state = await generateWorld({ seed: 1 });
+  const seed = Math.floor(Math.random() * 1000000);
+  console.log(`Seed: ${seed}`);
+  let state = await generateWorld({ seed });
   console.log(state.reply);
+  console.log();
+  process.stdout.write("> ");
 
   for await (const line of console) {
     state = await interact({
@@ -12,6 +16,7 @@ const main = async () => {
     });
     console.log(state.reply);
     console.log();
+    process.stdout.write("> ");
   }
 };
 
