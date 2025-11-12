@@ -46,49 +46,85 @@ export const doesThisMakeSense = async (state: State): Promise<Result> => {
         ...messages,
         {
           role: "system",
-          content: `
-          Analyze the latest USER message and determine if it's a valid action in the game.
+          content: `You are a validation system for a text adventure game. Your ONLY job is to check if a player's action is PHYSICALLY POSSIBLE to ATTEMPT - NOT whether it will succeed, is wise, legal, or moral.
 
-          KEY RULES:
-          1. ALWAYS accept requests for the game master to describe/generate content (these are meta-game and always valid)
-          2. Accept the current game state AS-IS from the assistant's messages (don't question game logic)
-          3. For player actions: check ONLY if physically possible for a normal person - do NOT evaluate if it's strategically good or will succeed
-          4. Reject when player invents items, characters, or does impossible things
-          5. IMPORTANT: Don't judge if an action is "smart" or "will work" - only if it's physically possible
+Let's think step by step to validate the player's action:
 
-          VALID INPUTS:
-          - Meta requests: "Generate...", "Describe...", "Start the game..." → ALWAYS true
-          - Speech/dialogue: "I say...", any quoted dialogue, verbal commands → ALWAYS true (speaking is always possible)
-          - Physical attempts: "I take/pick up/grab/open/examine/touch/move/eat/drink/break..." → true (attempting is valid, game decides if it succeeds)
-          - Movement: "I go north", "I walk to...", "I enter..." → true
-          - Basic actions: eating, drinking, sleeping, sitting, standing, running → true (normal human actions)
-          - Actions fitting bizarre contexts: If in spaceship, actions make sense in that context
+STEP 1: Check if this is a meta-request
+- Does the player ask the game master to generate/describe/start something?
+- If YES → VALID (always allow meta-requests)
+- If NO → Continue to Step 2
 
-          INVALID INPUTS:
-          - Impossible physical abilities: "I fly", "I teleport", "I phase through walls" (without magic/special abilities)
-          - Creating things from nothing: "I summon a dragon", "I invent a laser gun", "A magical sword appears"
-          - Controlling NPCs/environment: "The guard lets me pass", "The door opens by itself", "The king gives me treasure"
+STEP 2: Check if player is speaking/communicating
+- Is this dialogue, speech, or verbal communication? (saying, asking, shouting, whispering)
+- If YES → VALID (speech is always physically possible)
+- If NO → Continue to Step 3
 
-          Provide your analysis:
-          - "makesSense": true if valid (meta-request OR possible action in current context)
-          - "reasoning": Brief explanation
+STEP 3: Check for impossible physics
+- Does this require flying, teleporting, phasing through walls, or other superhuman abilities?
+- Does this create matter from nothing? (summoning, conjuring, inventing items)
+- If YES to any → INVALID
+- If NO → Continue to Step 4
 
-          CRITICAL: "makesSense" means "is this physically possible?" NOT "is this a good idea?" or "is this safe?"
-          A player can attempt to eat poison, jump off a cliff, or pet a dragon - these are all VALID attempts.
-          The game master decides the consequences.
+STEP 4: Check for narrating/controlling
+- Does this narrate what NPCs do/say/think? ("The merchant smiles", "Guard says X", "NPC believes me")
+- Does this narrate environment changes? ("The door opens", "Rain clouds disperse", "Weather clears")
+- Does this narrate item appearances? ("A sword appears", "Chicken materializes")
+- Does this declare success/outcomes? ("I succeed", "The lock breaks", "NPC agrees")
+- IMPORTANT: Player acting ON environment is OK ("I try to open door"), environment changing BY ITSELF is NOT OK ("The door opens")
+- If YES to narrating → INVALID
+- If NO → Continue to Step 5
 
-          Examples:
-          - "Generate a description..." → true (meta-request)
-          - "I take the sword" → true (attempting to take is valid)
-          - "I eat the pastry" → true (eating is a normal action, even if it's a bad idea)
-          - "I drink the potion" → true (drinking is physically possible)
-          - "I fly like an eagle" → false (impossible ability)
-          - "I summon a dragon" → false (creating from nothing)
-          - "The guard steps aside" → false (controlling NPC)
-          - "Punch it!" (dialogue) → true (speech always valid)
+STEP 5: Physical possibility check
+- Can a normal human physically ATTEMPT this action?
+- Remember: attempting is different from succeeding
+- Examples of VALID attempts:
+  * "I try to steal the dagger" → VALID (attempting theft is physical, even if illegal)
+  * "I eat the poison" → VALID (eating is physical, even if deadly)
+  * "I jump off the cliff" → VALID (jumping is physical, even if suicidal)
+  * "I attack the king" → VALID (attacking is physical, even if unwise)
+  * "I open the door" → VALID (trying to open is physical)
 
-          REMEMBER: Your job is to validate if an action is POSSIBLE, not if it's WISE. The game master decides outcomes.
-          `,
+CRITICAL DISTINCTIONS:
+❌ WRONG: "Stealing is illegal" → We don't judge morality
+❌ WRONG: "That would be dangerous" → We don't judge safety
+❌ WRONG: "The player doesn't have that item" → We check existence in Step 6
+✅ RIGHT: "Can a human physically attempt this action?"
+
+STEP 6: Context/existence check
+- Does the action reference specific items, NPCs, or locations?
+- Check the assistant's messages: are they mentioned as present in scene OR in player's inventory?
+- Key phrases to watch:
+  * "I take out my [item]" → item must be in described inventory
+  * "I use my [item]" → item must be mentioned as possessed
+  * "I talk to [NPC]" → NPC must be in scene
+  * "I compare [item1] to [item2]" → both items must exist
+- If referenced but NEVER mentioned in context → INVALID (inventing items/people)
+- If exists in scene/inventory → VALID
+
+FEW-SHOT EXAMPLES:
+
+Example 1 - Dangerous but valid:
+User: "I eat the pastry"
+Analysis: Step 1 (meta?) No. Step 2 (speech?) No. Step 3 (impossible?) No. Step 4 (controlling?) No. Step 5 (physical?) Yes, eating is a normal human action.
+Result: {"makesSense": true, "reasoning": "Eating is a physically possible action"}
+
+Example 2 - Illegal but valid:
+User: "I try to sneakily pocket the dagger"
+Analysis: Step 1 (meta?) No. Step 2 (speech?) No. Step 3 (impossible?) No. Step 4 (controlling?) No. Step 5 (physical?) Yes, moving hand to pocket item is physical.
+Result: {"makesSense": true, "reasoning": "Attempting to take an item is physically possible"}
+
+Example 3 - Controlling NPC:
+User: "The merchant gives me a discount"
+Analysis: Step 1 (meta?) No. Step 2 (speech?) No. Step 3 (impossible?) No. Step 4 (controlling?) YES - narrates NPC action.
+Result: {"makesSense": false, "reasoning": "This controls the NPC's decision"}
+
+Example 4 - Inventing items:
+User: "I pull out my magic scroll"
+Analysis: Step 1 (meta?) No. Step 2 (speech?) No. Step 3 (impossible?) No. Step 4 (controlling?) No. Step 6 (exists?) Check scene - magic scroll not mentioned.
+Result: {"makesSense": false, "reasoning": "Item not present in scene"}
+
+Now analyze the latest USER message following these steps.`,
         },
       ],
       format: {
@@ -106,7 +142,8 @@ export const doesThisMakeSense = async (state: State): Promise<Result> => {
       stream: false,
       options: {
         seed,
-        temperature: 0.5,
+        temperature: 0,
+        top_p: 0.9,
       },
     }),
   });
