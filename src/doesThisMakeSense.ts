@@ -91,16 +91,35 @@ CRITICAL DISTINCTIONS:
 ❌ WRONG: "The player doesn't have that item" → We check existence in Step 6
 ✅ RIGHT: "Can a human physically attempt this action?"
 
-STEP 6: Context/existence check
-- Does the action reference specific items, NPCs, or locations?
-- Check the assistant's messages: are they mentioned as present in scene OR in player's inventory?
-- Key phrases to watch:
-  * "I take out my [item]" → item must be in described inventory
-  * "I use my [item]" → item must be mentioned as possessed
-  * "I talk to [NPC]" → NPC must be in scene
-  * "I compare [item1] to [item2]" → both items must exist
-- If referenced but NEVER mentioned in context → INVALID (inventing items/people)
-- If exists in scene/inventory → VALID
+STEP 6: Item existence and state validation
+When player references items/NPCs/locations, check conversation history:
+
+A. DOES IT EXIST? Scan assistant messages - was this thing ever described in the game world?
+   - Never mentioned anywhere → REJECT (player is inventing things)
+   - Mentioned in scene description → Continue to B
+
+B. DOES PLAYER HAVE IT? (Only for items player claims to possess/use)
+   When player says "I use X" or "I take out X", they're claiming to CURRENTLY possess X.
+   Read conversation chronologically to verify this claim:
+
+   POSSESSION EVENTS (player gains item):
+   - Player takes/picks up/grabs item + assistant acknowledges
+   - NPC gives item to player + player accepts
+   - Found in player's starting inventory
+
+   LOSS EVENTS (player loses item):
+   - Player discards/throws/drops item
+   - Player transfers item to someone else (gives, sells, trades)
+   - Item consumed/destroyed/eaten/shattered
+   - Assistant narrates item leaving player's possession
+
+   VALIDATION LOGIC:
+   1. Find most recent event for this item by scanning chronologically
+   2. If most recent event is LOSS → REJECT (player doesn't have it anymore)
+   3. If most recent event is POSSESSION → ALLOW (player has it)
+   4. If item exists but no possession event → REJECT (never picked up)
+
+IMPORTANT: If player tries to use an item that was destroyed, given away, or otherwise lost in conversation history, this is INVALID even though the physical action itself would be possible.
 
 FEW-SHOT EXAMPLES:
 
@@ -119,10 +138,22 @@ User: "The merchant gives me a discount"
 Analysis: Step 1 (meta?) No. Step 2 (speech?) No. Step 3 (impossible?) No. Step 4 (controlling?) YES - narrates NPC action.
 Result: {"makesSense": false, "reasoning": "This controls the NPC's decision"}
 
-Example 4 - Inventing items:
-User: "I pull out my magic scroll"
-Analysis: Step 1 (meta?) No. Step 2 (speech?) No. Step 3 (impossible?) No. Step 4 (controlling?) No. Step 6 (exists?) Check scene - magic scroll not mentioned.
-Result: {"makesSense": false, "reasoning": "Item not present in scene"}
+Example 4 - Item never existed:
+User: "I pull out my magic wand"
+Analysis: Step 6A - Check history: no assistant message mentions a magic wand. Never existed in game world.
+Result: {"makesSense": false, "reasoning": "No magic wand was ever mentioned"}
+
+Example 5 - Item state changed:
+Context: Assistant says "You pick up a torch" → later player says "I throw the torch away" → Assistant confirms
+User: "I light the torch"
+Analysis: Step 6B - Torch existed (mentioned), was possessed (picked up), then lost (thrown away). Most recent state is LOSS.
+Result: {"makesSense": false, "reasoning": "You no longer have the torch"}
+
+Example 6 - Valid possession:
+Context: Assistant describes "a sword on the table" → Player says "I take the sword" → Assistant confirms
+User: "I swing the sword"
+Analysis: Step 6B - Sword exists, was picked up, no loss event afterward. Current state is POSSESSED.
+Result: {"makesSense": true, "reasoning": "You have the sword"}
 
 Now analyze the latest USER message following these steps.`,
         },

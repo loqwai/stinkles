@@ -138,4 +138,56 @@ Your epic, ridiculous quest begins as you are approached by a hooded figure who 
       expect(res.makesSense, res.reasoning).toBe(true);
     });
   });
+
+  describe("when the user examines their surroundings in a described room", () => {
+    let res: Awaited<ReturnType<typeof doesThisMakeSense>>;
+
+    beforeAll(async () => {
+      res = await doesThisMakeSense({
+        seed: 1,
+        messages: [
+          {
+            content: prompt,
+            role: "system",
+          },
+          {
+            role: "assistant",
+            content:
+              "You stand in a grand hall with tapestries on the walls. Lady Eriol watches you from across the room, her emerald eyes piercing.",
+          },
+          { role: "user", content: "I examine my surroundings carefully" },
+        ],
+      });
+    });
+
+    it("should allow examining surroundings as a valid action", async () => {
+      expect(res.makesSense, res.reasoning).toBe(true);
+    });
+  });
+
+  describe("when the user looks at an NPC that was described", () => {
+    let res: Awaited<ReturnType<typeof doesThisMakeSense>>;
+
+    beforeAll(async () => {
+      res = await doesThisMakeSense({
+        seed: 1,
+        messages: [
+          {
+            content: prompt,
+            role: "system",
+          },
+          {
+            role: "assistant",
+            content:
+              "You stand in a grand hall with tapestries on the walls. Lady Eriol watches you from across the room, her emerald eyes piercing.",
+          },
+          { role: "user", content: "I look at Lady Eriol" },
+        ],
+      });
+    });
+
+    it("should allow looking at described NPCs as a valid action", async () => {
+      expect(res.makesSense, res.reasoning).toBe(true);
+    });
+  });
 });
