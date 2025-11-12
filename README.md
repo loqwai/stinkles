@@ -13,9 +13,17 @@ Run with custom prompt:
 ./index.ts --seed 42 --prompt-file prompts/space-adventure.txt
 ```
 
+Run with auto-save/load:
+```bash
+./index.ts --seed 42 --auto-save
+```
+
+Auto-save creates save files named `<prompt_name>__<seed>.json` and automatically loads them on restart.
+
 ## Features
 
 - **Customizable Prompts**: Create your own game master prompts in the `prompts/` directory
+- **Auto-Save/Load**: Use `--auto-save` to automatically save progress after every step
 - **Verbosity Control**: Use `/verbosity terse|normal|verbose` to adjust response length
 - **Deterministic**: Use `--seed` to get reproducible game sessions
 - **Validation System**: AI validates player actions for physical possibility

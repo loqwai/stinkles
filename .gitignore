@@ -130,3 +130,6 @@ dist
 .pnp.*
 
 .jj/
+
+# Game save files
+*__*.json

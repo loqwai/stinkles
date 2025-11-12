@@ -2,13 +2,14 @@
 
 import { generateWorld, interact, loadPromptFromFile } from "./src/world";
 import { parseCommand } from "./src/commandParser";
+import { saveState, loadState } from "./src/save";
 import { parseArgs } from "util";
 import { strict as assert } from "assert";
 import { join } from "path";
 
 const getArgs = (args: string[]) => {
   const {
-    values: { seed, "prompt-file": promptFile },
+    values: { seed, "prompt-file": promptFile, "auto-save": autoSave },
   } = parseArgs({
     args,
     options: {
@@ -20,6 +21,10 @@ const getArgs = (args: string[]) => {
         type: "string",
         default: join(import.meta.dir, "prompts", "default.txt"),
       },
+      "auto-save": {
+        type: "boolean",
+        default: false,
+      },
     },
     allowPositionals: true,
   });
@@ -27,11 +32,12 @@ const getArgs = (args: string[]) => {
   return {
     seed: Number(seed),
     promptFile: promptFile as string,
+    autoSave: autoSave as boolean,
   };
 };
 
 const main = async () => {
-  const { seed, promptFile } = getArgs(Bun.argv);
+  const { seed, promptFile, autoSave } = getArgs(Bun.argv);
 
   assert(Number.isInteger(seed), "Seed must be an integer");
 
@@ -40,8 +46,27 @@ const main = async () => {
 
   console.log(`Seed: ${seed}`);
   console.log(`Prompt: ${promptFile}`);
-  let state = await generateWorld({ seed, basePrompt });
-  console.log(state.displayReply ?? state.reply);
+  if (autoSave) {
+    console.log(`Auto-save: enabled`);
+  }
+
+  // Try to load existing save if auto-save is enabled
+  let state = autoSave ? loadState(promptFile, seed) : null;
+
+  if (state) {
+    console.log(`Loaded save from previous session`);
+    console.log(state.displayReply ?? state.reply);
+  } else {
+    // Generate new world
+    state = await generateWorld({ seed, basePrompt });
+    console.log(state.displayReply ?? state.reply);
+
+    // Save initial state if auto-save is enabled
+    if (autoSave) {
+      saveState(state, promptFile);
+    }
+  }
+
   console.log();
   process.stdout.write("> ");
 
@@ -62,6 +87,11 @@ const main = async () => {
       state = await interact(state, line);
       // Display the transformed reply, fallback to verbose if not set
       console.log(state.displayReply ?? state.reply);
+
+      // Auto-save after each interaction
+      if (autoSave) {
+        saveState(state, promptFile);
+      }
     }
 
     console.log();
