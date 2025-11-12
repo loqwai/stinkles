@@ -37,6 +37,9 @@ Output ONLY the rewritten text, nothing else.`,
     },
   ];
 
+  // Set max tokens based on verbosity level
+  const maxTokens = targetVerbosity === "terse" ? 50 : 150;
+
   const response = await fetch("http://localhost:11434/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -44,7 +47,11 @@ Output ONLY the rewritten text, nothing else.`,
       model: "llama3.2:latest",
       messages,
       stream: false,
-      options: { seed, temperature: 0.5 },
+      options: {
+        seed,
+        temperature: 0.5,
+        num_predict: maxTokens, // Limit response length
+      },
     }),
   });
 

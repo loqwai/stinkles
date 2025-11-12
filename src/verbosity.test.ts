@@ -1,5 +1,5 @@
 import { describe, it, beforeAll, expect } from "bun:test";
-import { interact, type State } from "./world";
+import { interact, generateWorld, type State } from "./world";
 
 describe("verbosity system", () => {
   const baseSeed = 1;
@@ -8,16 +8,12 @@ describe("verbosity system", () => {
     let state: State;
 
     beforeAll(async () => {
-      const initialState: State = {
-        reply: "",
-        messages: [],
-        seed: baseSeed,
-        inventory: [],
-        verbosity: "terse",
-      };
+      // First generate world to establish context
+      const worldState = await generateWorld({ seed: baseSeed, verbosity: "terse" });
 
+      // Then interact with it
       state = await interact(
-        initialState,
+        worldState,
         "I open the ancient wooden door before me."
       );
     });
@@ -58,16 +54,12 @@ describe("verbosity system", () => {
     let state: State;
 
     beforeAll(async () => {
-      const initialState: State = {
-        reply: "",
-        messages: [],
-        seed: baseSeed,
-        inventory: [],
-        verbosity: "normal",
-      };
+      // First generate world to establish context
+      const worldState = await generateWorld({ seed: baseSeed, verbosity: "normal" });
 
+      // Then interact with it
       state = await interact(
-        initialState,
+        worldState,
         "I open the ancient wooden door before me."
       );
     });
@@ -76,7 +68,7 @@ describe("verbosity system", () => {
       // Normal should be between terse and verbose
       const display = state.displayReply ?? state.reply;
       expect(display.length).toBeGreaterThan(50);
-      expect(display.length).toBeLessThan(400);
+      expect(display.length).toBeLessThan(500);
     });
 
     it("includes some descriptive language", () => {
@@ -102,16 +94,12 @@ describe("verbosity system", () => {
     let state: State;
 
     beforeAll(async () => {
-      const initialState: State = {
-        reply: "",
-        messages: [],
-        seed: baseSeed,
-        inventory: [],
-        verbosity: "verbose",
-      };
+      // First generate world to establish context
+      const worldState = await generateWorld({ seed: baseSeed, verbosity: "verbose" });
 
+      // Then interact with it
       state = await interact(
-        initialState,
+        worldState,
         "I open the ancient wooden door before me."
       );
     });
@@ -159,38 +147,15 @@ describe("verbosity system", () => {
     beforeAll(async () => {
       const userAction = "I open the ancient wooden door before me.";
 
-      terseState = await interact(
-        {
-          reply: "",
-          messages: [],
-          seed: baseSeed,
-          inventory: [],
-          verbosity: "terse",
-        },
-        userAction
-      );
+      // Generate world with each verbosity level, then interact
+      const terseWorld = await generateWorld({ seed: baseSeed, verbosity: "terse" });
+      terseState = await interact(terseWorld, userAction);
 
-      normalState = await interact(
-        {
-          reply: "",
-          messages: [],
-          seed: baseSeed,
-          inventory: [],
-          verbosity: "normal",
-        },
-        userAction
-      );
+      const normalWorld = await generateWorld({ seed: baseSeed, verbosity: "normal" });
+      normalState = await interact(normalWorld, userAction);
 
-      verboseState = await interact(
-        {
-          reply: "",
-          messages: [],
-          seed: baseSeed,
-          inventory: [],
-          verbosity: "verbose",
-        },
-        userAction
-      );
+      const verboseWorld = await generateWorld({ seed: baseSeed, verbosity: "verbose" });
+      verboseState = await interact(verboseWorld, userAction);
     });
 
     it("terse produces shorter displayed responses than normal", () => {

@@ -18,14 +18,16 @@ export const doesThisMakeSense = async (state: State): Promise<Result> => {
           KEY RULES:
           1. ALWAYS accept requests for the game master to describe/generate content (these are meta-game and always valid)
           2. Accept the current game state AS-IS from the assistant's messages (don't question game logic)
-          3. For player actions: check if physically possible for a normal person in the current context
+          3. For player actions: check ONLY if physically possible for a normal person - do NOT evaluate if it's strategically good or will succeed
           4. Reject when player invents items, characters, or does impossible things
+          5. IMPORTANT: Don't judge if an action is "smart" or "will work" - only if it's physically possible
 
           VALID INPUTS:
           - Meta requests: "Generate...", "Describe...", "Start the game..." → ALWAYS true
           - Speech/dialogue: "I say...", any quoted dialogue, verbal commands → ALWAYS true (speaking is always possible)
-          - Physical attempts: "I take/pick up/grab/open/examine/touch/move..." → true (attempting is valid, game decides if it succeeds)
+          - Physical attempts: "I take/pick up/grab/open/examine/touch/move/eat/drink/break..." → true (attempting is valid, game decides if it succeeds)
           - Movement: "I go north", "I walk to...", "I enter..." → true
+          - Basic actions: eating, drinking, sleeping, sitting, standing, running → true (normal human actions)
           - Actions fitting bizarre contexts: If in spaceship, actions make sense in that context
 
           INVALID INPUTS:
@@ -37,13 +39,21 @@ export const doesThisMakeSense = async (state: State): Promise<Result> => {
           - "makesSense": true if valid (meta-request OR possible action in current context)
           - "reasoning": Brief explanation
 
+          CRITICAL: "makesSense" means "is this physically possible?" NOT "is this a good idea?" or "is this safe?"
+          A player can attempt to eat poison, jump off a cliff, or pet a dragon - these are all VALID attempts.
+          The game master decides the consequences.
+
           Examples:
           - "Generate a description..." → true (meta-request)
           - "I take the sword" → true (attempting to take is valid)
+          - "I eat the pastry" → true (eating is a normal action, even if it's a bad idea)
+          - "I drink the potion" → true (drinking is physically possible)
           - "I fly like an eagle" → false (impossible ability)
           - "I summon a dragon" → false (creating from nothing)
           - "The guard steps aside" → false (controlling NPC)
           - "Punch it!" (dialogue) → true (speech always valid)
+
+          REMEMBER: Your job is to validate if an action is POSSIBLE, not if it's WISE. The game master decides outcomes.
           `,
         },
       ],

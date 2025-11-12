@@ -28,7 +28,7 @@ export const getPrompt = (verbosity: Verbosity = "normal"): string => {
     case "verbose":
       return `${basePrompt}
 
-  RESPONSE STYLE: Be maximally descriptive and dramatic. Use extensive purple prose with vivid sensory details. Paint a rich picture with elaborate descriptions of sights, sounds, textures, and atmosphere. Layer multiple dramatic adjectives and use poetic, flowing language. Let your responses expand to capture the full epic scope of the moment.`;
+  RESPONSE STYLE: You MUST write AT LEAST 3-5 paragraphs with extensive purple prose. Be maximally descriptive and dramatic with vivid sensory details. Paint a rich picture with elaborate descriptions of sights, sounds, textures, and atmosphere. Layer multiple dramatic adjectives and use poetic, flowing language. Expand your responses with world-building details, atmospheric descriptions, and epic storytelling. DO NOT write short responses - always elaborate extensively.`;
     case "normal":
     default:
       return `${basePrompt}
@@ -101,7 +101,11 @@ export const interact = async (
       model: "llama3.2:latest",
       messages,
       stream: false,
-      options: { seed: state.seed, temperature: 0.5 },
+      options: {
+        seed: state.seed,
+        temperature: 0.5,
+        num_predict: 512, // Ensure verbose responses have room to be detailed
+      },
     }),
   });
 
