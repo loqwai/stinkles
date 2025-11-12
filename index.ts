@@ -1,13 +1,14 @@
 #!/usr/bin/env bun
 
-import { generateWorld, interact } from "./src/world";
+import { generateWorld, interact, loadPromptFromFile } from "./src/world";
 import { parseCommand } from "./src/commandParser";
 import { parseArgs } from "util";
 import { strict as assert } from "assert";
+import { join } from "path";
 
 const getArgs = (args: string[]) => {
   const {
-    values: { seed },
+    values: { seed, "prompt-file": promptFile },
   } = parseArgs({
     args,
     options: {
@@ -15,22 +16,31 @@ const getArgs = (args: string[]) => {
         type: "string",
         default: Math.floor(Math.random() * 1000000).toString(),
       },
+      "prompt-file": {
+        type: "string",
+        default: join(import.meta.dir, "prompts", "default.txt"),
+      },
     },
     allowPositionals: true,
   });
 
   return {
     seed: Number(seed),
+    promptFile: promptFile as string,
   };
 };
 
 const main = async () => {
-  const { seed } = getArgs(Bun.argv);
+  const { seed, promptFile } = getArgs(Bun.argv);
 
   assert(Number.isInteger(seed), "Seed must be an integer");
 
+  // Load the base prompt from file
+  const basePrompt = loadPromptFromFile(promptFile);
+
   console.log(`Seed: ${seed}`);
-  let state = await generateWorld({ seed });
+  console.log(`Prompt: ${promptFile}`);
+  let state = await generateWorld({ seed, basePrompt });
   console.log(state.displayReply ?? state.reply);
   console.log();
   process.stdout.write("> ");
