@@ -75,16 +75,16 @@ STEP 4: Check for narrating/controlling
 - If YES to narrating → INVALID
 - If NO → Continue to Step 5
 
-STEP 5: Item existence and state validation (CHECK THIS BEFORE PHYSICAL POSSIBILITY!)
-When player references items/NPCs/locations, check conversation history:
+STEP 5: Item tracking (check when player references specific items)
 
-A. DOES IT EXIST? Scan assistant messages - was this thing ever described in the game world?
-   - Never mentioned anywhere → REJECT (player is inventing things)
-   - Mentioned in scene description → Continue to B
+When player references a specific item, first determine: can they do this action WITHOUT currently possessing the item?
 
-B. DOES PLAYER HAVE IT? (Only for items player claims to possess/use)
-   When player says "I use X" or "I take out X", they're claiming to CURRENTLY possess X.
-   Read conversation chronologically to verify this claim:
+Examples where possession is NOT required:
+- Looking at distant objects in the environment
+- Asking NPCs about items
+- Attempting to acquire an item
+
+If possession IS required for the action, scan conversation history to verify they have it:
 
    POSSESSION EVENTS (player gains item):
    - Player takes/picks up/grabs item + assistant acknowledges
@@ -103,16 +103,18 @@ B. DOES PLAYER HAVE IT? (Only for items player claims to possess/use)
    3. If most recent event is POSSESSION → ALLOW (player has it)
    4. If item exists but no possession event → REJECT (never picked up)
 
-IMPORTANT: If player tries to use an item that was destroyed, given away, or otherwise lost in conversation history, this is INVALID even though the physical action itself would be possible.
-   - If item state check FAILS → INVALID (stop here, don't check physical possibility)
-   - If item state check PASSES → Continue to Step 6
+CRITICAL: Check inventory state BEFORE checking physical possibility.
+   If player doesn't possess an item they're trying to interact with, return INVALID immediately.
+   Don't justify with "the action is physically possible" if they lack the item.
+
+   If item state check FAILS → INVALID (stop here, don't check physical possibility)
+   If item state check PASSES → Continue to Step 6
 
 STEP 6: Physical possibility check (ONLY if Steps 1-5 passed)
 - Can a normal human physically ATTEMPT this action?
 - Remember: attempting is different from succeeding
 - Examples: stealing (physical), eating poison (physical), jumping off cliff (physical)
-
-CRITICAL: Steps are ordered by priority. If Step 5 (inventory) fails, reject immediately without checking Step 6 (physical).
+- WARNING: Never reach this step if Step 5 failed
 
 FEW-SHOT EXAMPLES:
 
@@ -139,7 +141,7 @@ Result: {"makesSense": false, "reasoning": "No magic wand was ever mentioned"}
 Example 5 - Item state changed:
 Context: Assistant says "You pick up a torch" → later player says "I throw the torch away" → Assistant confirms
 User: "I light the torch"
-Analysis: Step 6B - Torch existed (mentioned), was possessed (picked up), then lost (thrown away). Most recent state is LOSS.
+Analysis: Step 5B - Torch existed (mentioned), was possessed (picked up), then lost (thrown away). Most recent state is LOSS.
 Result: {"makesSense": false, "reasoning": "You no longer have the torch"}
 
 Example 6 - Valid possession:

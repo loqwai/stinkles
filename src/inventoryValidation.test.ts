@@ -184,7 +184,7 @@ describe("Inventory Validation - Item Tracking", () => {
         `Should reject eating already consumed bread. Reasoning: ${res.reasoning}`
       ).toBe(false);
       expect(res.reasoning.toLowerCase()).toMatch(
-        /ate|eaten|consumed|already/
+        /ate|eaten|consumed|already|no longer have/
       );
     });
   });
@@ -216,7 +216,7 @@ describe("Inventory Validation - Item Tracking", () => {
         res.makesSense,
         `Should reject using declined item. Reasoning: ${res.reasoning}`
       ).toBe(false);
-      expect(res.reasoning.toLowerCase()).toMatch(/declined|don't have|never/);
+      expect(res.reasoning.toLowerCase()).toMatch(/declined|don't have|don't possess|never/);
     });
   });
 
