@@ -3,6 +3,40 @@ import { interact } from "./world";
 export const doesThisMakeSense = async (state: State): Promise<Result> => {
   const { messages, seed } = state;
 
+  // Check if context is empty (no assistant messages with scene descriptions)
+  const hasContext = messages.some(
+    (msg) => msg.role === "assistant" && msg.content.trim().length > 0
+  );
+
+  if (!hasContext) {
+    // No context established - check if it's a meta request
+    const latestUserMessage = messages
+      .slice()
+      .reverse()
+      .find((msg) => msg.role === "user");
+
+    if (latestUserMessage) {
+      const content = latestUserMessage.content.toLowerCase();
+      const isMetaRequest =
+        content.includes("generate") ||
+        content.includes("describe") ||
+        content.includes("start");
+
+      if (isMetaRequest) {
+        return {
+          makesSense: true,
+          reasoning: "Meta-request to generate content is always valid",
+        };
+      } else {
+        return {
+          makesSense: false,
+          reasoning:
+            "No game context established - player must request scene generation first",
+        };
+      }
+    }
+  }
+
   const response = await fetch("http://localhost:11434/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
