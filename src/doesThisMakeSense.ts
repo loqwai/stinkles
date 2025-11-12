@@ -75,23 +75,7 @@ STEP 4: Check for narrating/controlling
 - If YES to narrating → INVALID
 - If NO → Continue to Step 5
 
-STEP 5: Physical possibility check
-- Can a normal human physically ATTEMPT this action?
-- Remember: attempting is different from succeeding
-- Examples of VALID attempts:
-  * "I try to steal the dagger" → VALID (attempting theft is physical, even if illegal)
-  * "I eat the poison" → VALID (eating is physical, even if deadly)
-  * "I jump off the cliff" → VALID (jumping is physical, even if suicidal)
-  * "I attack the king" → VALID (attacking is physical, even if unwise)
-  * "I open the door" → VALID (trying to open is physical)
-
-CRITICAL DISTINCTIONS:
-❌ WRONG: "Stealing is illegal" → We don't judge morality
-❌ WRONG: "That would be dangerous" → We don't judge safety
-❌ WRONG: "The player doesn't have that item" → We check existence in Step 6
-✅ RIGHT: "Can a human physically attempt this action?"
-
-STEP 6: Item existence and state validation
+STEP 5: Item existence and state validation (CHECK THIS BEFORE PHYSICAL POSSIBILITY!)
 When player references items/NPCs/locations, check conversation history:
 
 A. DOES IT EXIST? Scan assistant messages - was this thing ever described in the game world?
@@ -120,12 +104,21 @@ B. DOES PLAYER HAVE IT? (Only for items player claims to possess/use)
    4. If item exists but no possession event → REJECT (never picked up)
 
 IMPORTANT: If player tries to use an item that was destroyed, given away, or otherwise lost in conversation history, this is INVALID even though the physical action itself would be possible.
+   - If item state check FAILS → INVALID (stop here, don't check physical possibility)
+   - If item state check PASSES → Continue to Step 6
+
+STEP 6: Physical possibility check (ONLY if Steps 1-5 passed)
+- Can a normal human physically ATTEMPT this action?
+- Remember: attempting is different from succeeding
+- Examples: stealing (physical), eating poison (physical), jumping off cliff (physical)
+
+CRITICAL: Steps are ordered by priority. If Step 5 (inventory) fails, reject immediately without checking Step 6 (physical).
 
 FEW-SHOT EXAMPLES:
 
 Example 1 - Dangerous but valid:
 User: "I eat the pastry"
-Analysis: Step 1 (meta?) No. Step 2 (speech?) No. Step 3 (impossible?) No. Step 4 (controlling?) No. Step 5 (physical?) Yes, eating is a normal human action.
+Analysis: Step 1 (meta?) No. Step 2 (speech?) No. Step 3 (impossible?) No. Step 4 (controlling?) No. Step 5 (inventory?) Eating doesn't reference specific item possession. Step 6 (physical?) Yes.
 Result: {"makesSense": true, "reasoning": "Eating is a physically possible action"}
 
 Example 2 - Illegal but valid:
