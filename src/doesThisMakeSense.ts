@@ -41,7 +41,7 @@ export const doesThisMakeSense = async (state: State): Promise<Result> => {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "llama3.2:latest",
+      model: "llama3.1:8b",
       messages: [
         ...messages,
         {
