@@ -9,17 +9,14 @@ import { join } from "path";
 
 const getArgs = (args: string[]) => {
   const {
-    values: { seed, "prompt-file": promptFile, "auto-save": autoSave },
+    values: { seed, "auto-save": autoSave },
+    positionals,
   } = parseArgs({
     args,
     options: {
       seed: {
         type: "string",
         default: Math.floor(Math.random() * 1000000).toString(),
-      },
-      "prompt-file": {
-        type: "string",
-        default: join(import.meta.dir, "prompts", "default.txt"),
       },
       "auto-save": {
         type: "boolean",
@@ -29,9 +26,14 @@ const getArgs = (args: string[]) => {
     allowPositionals: true,
   });
 
+  // First user positional argument is the prompt file (after bun executable and script path)
+  // positionals[0] = bun executable, positionals[1] = script path, positionals[2] = first user arg
+  const promptFile =
+    positionals[2] ?? join(import.meta.dir, "prompts", "default.md");
+
   return {
     seed: Number(seed),
-    promptFile: promptFile as string,
+    promptFile,
     autoSave: autoSave as boolean,
   };
 };

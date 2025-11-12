@@ -8,14 +8,14 @@ Run with default fantasy prompt:
 ./index.ts --seed 42
 ```
 
-Run with custom prompt:
+Run with custom prompt (specify as first argument):
 ```bash
-./index.ts --seed 42 --prompt-file prompts/space-adventure.txt
+./index.ts prompts/epic-fantasy.md --seed 42
 ```
 
 Run with auto-save/load:
 ```bash
-./index.ts --seed 42 --auto-save
+./index.ts prompts/space-adventure.md --seed 42 --auto-save
 ```
 
 Auto-save creates save files named `<prompt_name>__<seed>.json` and automatically loads them on restart.
@@ -30,8 +30,11 @@ Auto-save creates save files named `<prompt_name>__<seed>.json` and automaticall
 
 ## Custom Prompts
 
-Create a text file in `prompts/` with your game master instructions. Examples:
-- `prompts/default.txt` - Fantasy RPG dungeon crawler
-- `prompts/space-adventure.txt` - Sci-fi space exploration
+Create a markdown file in `prompts/` with your game master instructions. Examples:
+- `prompts/default.md` - Fantasy RPG dungeon crawler
+- `prompts/epic-fantasy.md` - Epic fantasy with dragons, ancient magic, and legendary quests
+- `prompts/space-adventure.md` - Sci-fi space exploration
 
 The prompt file contains the base instructions for the game master. Verbosity modifiers are automatically applied on top.
+
+Prompts can include atmosphere keywords that guide the LLM's creative descriptions while maintaining consistency.

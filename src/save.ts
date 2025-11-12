@@ -3,8 +3,8 @@ import { basename } from "path";
 import type { State } from "./world";
 
 export const getSaveFileName = (promptFile: string, seed: number): string => {
-  // Extract prompt name from file path (e.g., "prompts/space-adventure.txt" -> "space-adventure")
-  const promptName = basename(promptFile, ".txt");
+  // Extract prompt name from file path (e.g., "prompts/space-adventure.md" -> "space-adventure")
+  const promptName = basename(promptFile, ".md");
   return `${promptName}__${seed}.json`;
 };
 
