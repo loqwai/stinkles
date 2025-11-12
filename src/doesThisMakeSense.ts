@@ -13,21 +13,37 @@ export const doesThisMakeSense = async (state: State): Promise<Result> => {
         {
           role: "system",
           content: `
-          Analyze the conversation history and determine if the latest assistant response is logically consistent and makes sense
-          within the context of a text-based RPG. Consider:
-          1. Are the actions physically possible for a normal player character?
-          2. Does it follow from the previous context?
-          3. Are there any sudden, unexplained changes or impossible actions?
+          Analyze the latest USER message and determine if it's a valid action in the game.
 
-          Provide your analysis in two parts:
-          - "makesSense": Set to true ONLY if the response is logical and consistent
-          - "reasoning": Explain WHY the response does or doesn't make sense
+          KEY RULES:
+          1. ALWAYS accept requests for the game master to describe/generate content (these are meta-game and always valid)
+          2. Accept the current game state AS-IS from the assistant's messages (don't question game logic)
+          3. For player actions: check if physically possible for a normal person in the current context
+          4. Reject when player invents items, characters, or does impossible things
 
-          Example:
-          If a player walks through a door and suddenly flies, "makesSense" should be false and reasoning should explain that
-          normal characters cannot fly without special abilities.
+          VALID INPUTS:
+          - Meta requests: "Generate...", "Describe...", "Start the game..." → ALWAYS true
+          - Speech/dialogue: "I say...", any quoted dialogue, verbal commands → ALWAYS true (speaking is always possible)
+          - Physical attempts: "I take/pick up/grab/open/examine/touch/move..." → true (attempting is valid, game decides if it succeeds)
+          - Movement: "I go north", "I walk to...", "I enter..." → true
+          - Actions fitting bizarre contexts: If in spaceship, actions make sense in that context
 
-          Your "reasoning" MUST match the value in "makesSense".
+          INVALID INPUTS:
+          - Impossible physical abilities: "I fly", "I teleport", "I phase through walls" (without magic/special abilities)
+          - Creating things from nothing: "I summon a dragon", "I invent a laser gun", "A magical sword appears"
+          - Controlling NPCs/environment: "The guard lets me pass", "The door opens by itself", "The king gives me treasure"
+
+          Provide your analysis:
+          - "makesSense": true if valid (meta-request OR possible action in current context)
+          - "reasoning": Brief explanation
+
+          Examples:
+          - "Generate a description..." → true (meta-request)
+          - "I take the sword" → true (attempting to take is valid)
+          - "I fly like an eagle" → false (impossible ability)
+          - "I summon a dragon" → false (creating from nothing)
+          - "The guard steps aside" → false (controlling NPC)
+          - "Punch it!" (dialogue) → true (speech always valid)
           `,
         },
       ],

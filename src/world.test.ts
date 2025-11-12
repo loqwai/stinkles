@@ -44,10 +44,10 @@ describe("world", () => {
       beforeAll(async () => {
         startMessages = state.messages;
 
-        state = await interact({
-          ...state,
-          question: "I go to the Caverns of Echoing Screams.",
-        });
+        state = await interact(
+          state,
+          "I go to the Caverns of Echoing Screams."
+        );
       });
 
       it("should return a sensible state", async () => {
@@ -61,10 +61,7 @@ describe("world", () => {
       describe.skip("when the user goes north until it no longer makes sense", () => {
         beforeAll(async () => {
           while (true) {
-            state = await interact({
-              ...state,
-              question: "I go north.",
-            });
+            state = await interact(state, "I go north.");
             const res = await doesThisMakeSense(state);
 
             console.log(`\n\n${state.reply}\nmakesSense(${res.makesSense}): ${res.reasoning}`);
@@ -82,10 +79,10 @@ describe("world", () => {
       let nextState: Awaited<ReturnType<typeof interact>>;
 
       beforeAll(async () => {
-        nextState = await interact({
-          ...state,
-          question: "I pilot the millenium falcon into the deathstar.",
-        });
+        nextState = await interact(
+          state,
+          "I pilot the millenium falcon into the deathstar."
+        );
       });
 
       it("should have a reply", () => {
