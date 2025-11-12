@@ -1,4 +1,4 @@
-#! /usr/bin/env bun
+#!/usr/bin/env bun
 
 import { generateWorld, interact } from "./src/world";
 import { parseCommand } from "./src/commandParser";
